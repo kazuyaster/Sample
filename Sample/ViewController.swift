@@ -132,6 +132,22 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
 
         let handler = VNSequenceRequestHandler()
+
+        let rectangleDetectionRequest = VNDetectRectanglesRequest { [weak self] (request, error) in
+            if let error = error {
+                NSLog("%@, %@", #function, error.localizedDescription)
+            }
+            guard let results = request.results else { return }
+            guard let observation = results.first as? VNDetectedObjectObservation else { return }
+            guard observation.confidence > 0.3 else { return }
+            let rect = observation.boundingBox
+            DispatchQueue.main.async {
+                let barcodes: [VNRectangleObservation] = results.compactMap { $0 as? VNRectangleObservation }
+                print("rectangles: \(barcodes.count)")
+                self?.previewView.barcodes = barcodes
+            }
+        }
+        /*
         let barcodesDetectionRequest = VNDetectBarcodesRequest { [weak self] (request, error) in
             if let error = error {
                 NSLog("%@, %@", #function, error.localizedDescription)
@@ -149,8 +165,9 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 self?.previewView.barcodes = barcodes
             }
         }
+         */
         let s = Date()
-        try? handler.perform([barcodesDetectionRequest], on: pixelBuffer)
+        try? handler.perform([rectangleDetectionRequest], on: pixelBuffer)
         NSLog("time: %lf s", -s.timeIntervalSinceNow)
     }
 }

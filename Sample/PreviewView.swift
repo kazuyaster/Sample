@@ -24,7 +24,7 @@ class PreviewView: UIView {
         }
     }
 
-    var barcodes: [VNBarcodeObservation] = [] {
+    var barcodes: [VNRectangleObservation] = [] {
         didSet {
             self.setNeedsDisplay()
         }
