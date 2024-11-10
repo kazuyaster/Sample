@@ -23,14 +23,12 @@ class ViewController : UIViewController {
             AVCaptureDevice.requestAccess(for: .video) { [weak self] (granted) in
                 if !granted {
                     self?.permissionStatus = .denied
-                    Snackbar.show(text: "Access to the camera is not permitted")
                 }
                 self?.sessionQueue.resume()
             }
             break
         default:
             permissionStatus = .denied
-            Snackbar.show(text: "Access to the camera is not permitted")
             break
         }
 
@@ -68,7 +66,7 @@ class ViewController : UIViewController {
 
                 self.session.addOutput(videoDataOutput)
             } catch {
-                Snackbar.show(text: error.localizedDescription)
+
             }
             self.session.commitConfiguration()
         }
@@ -104,7 +102,7 @@ class ViewController : UIViewController {
             return
         }
         let orientation = UIDevice.current.orientation
-        if UIDeviceOrientationIsPortrait(orientation) || UIDeviceOrientationIsLandscape(orientation) {
+        if orientation.isPortrait || orientation.isLandscape {
             if self.permissionStatus == .authorized {
                 previewView.connection?.videoOrientation = AVCaptureVideoOrientation(rawValue: orientation.rawValue)!
             }
@@ -145,7 +143,6 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             let text = results.flatMap { $0 as? VNBarcodeObservation }
                 .flatMap { $0.payloadStringValue }
                 .joined(separator: ", ")
-            Snackbar.show(text: text)
             DispatchQueue.main.async {
                 let barcodes: [VNBarcodeObservation] = results.flatMap { $0 as? VNBarcodeObservation }
                 NSLog("barcodes: %d, %@", barcodes.count, text)
@@ -167,6 +164,7 @@ fileprivate extension AVCaptureVideoOrientation {
         case .landscapeRight:       return .landscapeRight
         case .portrait:             return .portrait
         case .portraitUpsideDown:   return .portraitUpsideDown
+
         }
     }
 
