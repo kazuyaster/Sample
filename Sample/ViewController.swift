@@ -22,7 +22,7 @@ class ViewController : UIViewController {
     //swiftlint:disable function_body_length
     override func viewDidLoad() {
         super.viewDidLoad()
-        session.sessionPreset = AVCaptureSession.Preset.photo
+//        session.sessionPreset = AVCaptureSession.Preset.photo
         previewView.session = session
 
         switch AVCaptureDevice.authorizationStatus(for: AVMediaType.video) {
@@ -153,7 +153,7 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             guard let results = request.results else { return }
             guard let observation = results.first as? VNDetectedObjectObservation else { return }
             guard observation.confidence > 0.3 else { return }
-            let rect = observation.boundingBox
+//            let rect = observation.boundingBox
             DispatchQueue.main.async {
                 let barcodes: [VNRectangleObservation] = results.compactMap { $0 as? VNRectangleObservation }
                 print("rectangles: \(barcodes.count)")
@@ -179,6 +179,7 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             }
         }
          */
+        rectangleDetectionRequest.maximumObservations = 100
         let s = Date()
         try? handler.perform([rectangleDetectionRequest], on: pixelBuffer)
         NSLog("time: %lf s", -s.timeIntervalSinceNow)
