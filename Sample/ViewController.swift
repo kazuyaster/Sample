@@ -10,6 +10,15 @@ class ViewController : UIViewController {
     fileprivate let sessionQueue = DispatchQueue(label: "com.unifa-e.qrcodereader")
     fileprivate var permissionStatus: AVAuthorizationStatus = .authorized
 
+    /// 画面の向き
+    enum Orientaion: Int {
+        /// ホームボタンの位置が
+        case right = -1,
+        down = 0,
+        left = 1,
+        up = 2
+    }
+
     //swiftlint:disable function_body_length
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,10 +58,14 @@ class ViewController : UIViewController {
                     guard let preview = self.previewView.layer as? AVCaptureVideoPreviewLayer else {
                         return
                     }
-                    let statusBarOrientation = UIApplication.shared.statusBarOrientation
+                    let scenes = UIApplication.shared.connectedScenes
+                    let windowScene = scenes.first as? UIWindowScene
+                    let statusBarOrientation = windowScene?.windows.first(where: { $0.isKeyWindow })?.windowScene?.interfaceOrientation
+
+//                    let statusBarOrientation = UIApplication.shared.statusBarOrientation
                     var videoOrientation: AVCaptureVideoOrientation = .portrait
                     if statusBarOrientation != .unknown {
-                        videoOrientation = AVCaptureVideoOrientation(interfaceOrientaion: statusBarOrientation)
+                        videoOrientation = AVCaptureVideoOrientation(interfaceOrientaion: statusBarOrientation ?? .portrait)
                     }
                     preview.connection?.videoOrientation = videoOrientation
                 }
@@ -144,7 +157,7 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             DispatchQueue.main.async {
                 let barcodes: [VNRectangleObservation] = results.compactMap { $0 as? VNRectangleObservation }
                 print("rectangles: \(barcodes.count)")
-                self?.previewView.barcodes = barcodes
+                self?.previewView.barcodes = barcodes   //VNDetectedObjectObservation を渡す
             }
         }
         /*
@@ -181,7 +194,8 @@ fileprivate extension AVCaptureVideoOrientation {
         case .landscapeRight:       return .landscapeRight
         case .portrait:             return .portrait
         case .portraitUpsideDown:   return .portraitUpsideDown
-
+        default:
+            return .portrait    
         }
     }
 
